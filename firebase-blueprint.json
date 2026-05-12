@@ -1,0 +1,35 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile information",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "lastActive": { "type": "string", "format": "date-time" }
+      },
+      "required": ["email"]
+    },
+    "TopicCompletion": {
+      "title": "Topic Completion",
+      "description": "Record of a completed topic",
+      "type": "object",
+      "properties": {
+        "completed": { "type": "boolean" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["completed", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile documents"
+    },
+    "/users/{userId}/progress/{topicId}": {
+      "schema": "TopicCompletion",
+      "description": "Progress tracking for specific topics"
+    }
+  }
+}

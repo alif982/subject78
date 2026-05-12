@@ -1,0 +1,6 @@
+{
+  "name": "Admission Syllabus Tracker",
+  "description": "A comprehensive progress tracker for university admission syllabus (Bangla, English, and General Knowledge) with modern UI and localStorage support.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}

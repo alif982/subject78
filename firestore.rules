@@ -1,0 +1,60 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Global helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // User Profile Rules
+    match /users/{userId} {
+      function isValidUser(data) {
+        return data.keys().hasAll(['email']) &&
+               data.email is string && data.email.size() <= 256 &&
+               (!('displayName' in data) || (data.displayName is string && data.displayName.size() <= 128)) &&
+               (!('lastActive' in data) || data.lastActive is timestamp);
+      }
+
+      allow get: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUser(incoming()) && incoming().email == request.auth.token.email;
+      allow update: if isOwner(userId) && isValidUser(incoming()) && 
+                    incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'lastActive']) &&
+                    incoming().email == existing().email;
+    }
+
+    // Progress Rules
+    match /users/{userId}/progress/{topicId} {
+      function isValidProgress(data) {
+        return data.keys().hasAll(['completed', 'updatedAt']) &&
+               data.keys().size() == 2 &&
+               data.completed is bool &&
+               data.updatedAt == request.time;
+      }
+
+      allow list, get: if isOwner(userId);
+      allow create, update: if isOwner(userId) && isValidId(topicId) && isValidProgress(incoming());
+      allow delete: if isOwner(userId);
+    }
+  }
+}
