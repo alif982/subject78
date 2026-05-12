@@ -64,6 +64,7 @@ export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [completedTopics, setCompletedTopics] = useState<Record<string, boolean>>(() => {
     try {
@@ -80,6 +81,7 @@ export default function App() {
   const [selectedSubjectId, setSelectedSubjectId] = useState<string>('all');
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
   const [collapsedSubjects, setCollapsedSubjects] = useState<Record<string, boolean>>({});
+  const [hiddenSubjects, setHiddenSubjects] = useState<Record<string, boolean>>({});
 
   // 1. Initial connection test & Auth listener
   useEffect(() => {
@@ -190,6 +192,13 @@ export default function App() {
     }));
   };
 
+  const toggleHideSubject = (subjectId: string) => {
+    setHiddenSubjects(prev => ({
+      ...prev,
+      [subjectId]: !prev[subjectId]
+    }));
+  };
+
   const toggleAllSubjects = (collapse: boolean) => {
     const newCollapsed: Record<string, boolean> = {};
     syllabusData.forEach(s => {
@@ -259,17 +268,23 @@ export default function App() {
   };
 
   const handleSignIn = async () => {
+    if (isLoggingIn) return;
     setAuthError(null);
+    setIsLoggingIn(true);
     try {
       await signInWithGoogle();
     } catch (error: any) {
-      if (error.code === 'auth/popup-closed-by-user') {
-        setAuthError('Sign-in window closed. Please try again.');
+      if (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-by-user') {
+        setAuthError('Sign-in cancelled. Please try again.');
         setTimeout(() => setAuthError(null), 3000);
+      } else if (error.code === 'auth/cancelled-popup-request') {
+        // Silently handle
       } else {
-        setAuthError('Failed to sign in. Please check your connection.');
+        setAuthError(`Sign-in failed: ${error.message || 'Check your connection'}`);
         setTimeout(() => setAuthError(null), 5000);
       }
+    } finally {
+      setIsLoggingIn(false);
     }
   };
 
@@ -292,6 +307,9 @@ export default function App() {
 
   const filteredSyllabus = useMemo(() => {
     return syllabusData.filter(subject => {
+      // Hide subjects manually hidden
+      if (hiddenSubjects[subject.id]) return false;
+
       // Filter by subject selection
       if (selectedSubjectId !== 'all' && subject.id !== selectedSubjectId) return false;
 
@@ -373,10 +391,17 @@ export default function App() {
               ) : (
                 <button
                   onClick={handleSignIn}
-                  className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-xl text-sm font-bold hover:bg-zinc-800 transition-all shadow-md"
+                  disabled={isLoggingIn}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all shadow-md ${
+                    isLoggingIn ? 'bg-slate-400 cursor-not-allowed' : 'bg-black text-white hover:bg-zinc-800'
+                  }`}
                 >
-                  <LogIn className="w-4 h-4" />
-                  Sign In
+                  {isLoggingIn ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <LogIn className="w-4 h-4" />
+                  )}
+                  {isLoggingIn ? 'Signing In...' : 'Sign In'}
                 </button>
               )}
             </div>
@@ -500,6 +525,16 @@ export default function App() {
               <ChevronDown className="w-4 h-4" />
             </button>
           </div>
+
+          {(Object.keys(hiddenSubjects).some(id => hiddenSubjects[id])) && (
+            <button
+              onClick={() => setHiddenSubjects({})}
+              className="px-3 py-2 rounded-xl bg-slate-100 text-slate-600 text-[10px] font-black uppercase tracking-wider hover:bg-slate-200 transition-all flex items-center gap-1"
+            >
+              <RotateCcw className="w-3 h-3" />
+              Reset Hidden
+            </button>
+          )}
         </div>
       </div>
 
@@ -542,15 +577,22 @@ export default function App() {
                 </button>
                 <div className="flex items-center gap-2">
                   <button
+                    onClick={() => toggleHideSubject(subject.id)}
+                    className="p-2 rounded-lg border border-slate-200 text-slate-400 hover:text-red-500 hover:border-red-100 transition-all"
+                    title="Hide Subject Card"
+                  >
+                    <EyeOff className="w-3.5 h-3.5" />
+                  </button>
+                  <button
                     onClick={() => toggleSubject(subject.id)}
                     className={`p-2 rounded-lg border transition-all ${
                       isCollapsed 
                       ? 'bg-black text-white border-black ring-2 ring-black/10' 
                       : 'bg-white border-slate-200 text-slate-400 hover:text-black'
                     }`}
-                    title={isCollapsed ? "Show Topics" : "Hide Topics"}
+                    title={isCollapsed ? "Show Topics" : "Minimize Topics"}
                   >
-                    {isCollapsed ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                    {isCollapsed ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronUp className="w-3.5 h-3.5" />}
                   </button>
                   <button
                     onClick={() => completeAllSubject(subject.id)}

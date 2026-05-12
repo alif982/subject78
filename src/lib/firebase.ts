@@ -55,7 +55,15 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
   throw new Error(JSON.stringify(errInfo));
 }
 
+let isLoginPending = false;
+
 export const signInWithGoogle = async () => {
+  if (isLoginPending) {
+    console.warn("Sign-in already in progress.");
+    return;
+  }
+  
+  isLoginPending = true;
   try {
     const result = await signInWithPopup(auth, googleProvider);
     return result.user;
@@ -64,10 +72,14 @@ export const signInWithGoogle = async () => {
       console.warn("User closed the login popup before completing the sign-in.");
     } else if (error.code === 'auth/cancelled-by-user') {
       console.warn("User cancelled the sign-in.");
+    } else if (error.code === 'auth/cancelled-popup-request') {
+      console.warn("A previous popup request was cancelled.");
     } else {
-      console.error("Error signing in with Google", error);
+      console.error("Error signing in with Google:", error.code, error.message);
     }
     throw error;
+  } finally {
+    isLoginPending = false;
   }
 };
 
