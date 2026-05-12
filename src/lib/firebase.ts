@@ -74,6 +74,13 @@ export const signInWithGoogle = async () => {
       console.warn("User cancelled the sign-in.");
     } else if (error.code === 'auth/cancelled-popup-request') {
       console.warn("A previous popup request was cancelled.");
+    } else if (error.code === 'auth/unauthorized-domain') {
+      console.error("FIREBASE ERROR: unauthorized-domain");
+      console.error("The domain you are using is not authorized in your Firebase project.");
+      console.error("Please add the following domains to your Firebase Console -> Authentication -> Settings -> Authorized Domains:");
+      console.error("- ais-dev-lsqdxpyjzx6phx7imhhqf2-679381712942.asia-east1.run.app");
+      console.error("- ais-pre-lsqdxpyjzx6phx7imhhqf2-679381712942.asia-east1.run.app");
+      console.error("- subtracker-delta-six.vercel.app");
     } else {
       console.error("Error signing in with Google:", error.code, error.message);
     }

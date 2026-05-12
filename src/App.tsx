@@ -279,6 +279,9 @@ export default function App() {
         setTimeout(() => setAuthError(null), 3000);
       } else if (error.code === 'auth/cancelled-popup-request') {
         // Silently handle
+      } else if (error.code === 'auth/unauthorized-domain') {
+        setAuthError('Unauthorized Domain: Please add this URL to Firebase Authentication Authorized Domains.');
+        setTimeout(() => setAuthError(null), 8000);
       } else {
         setAuthError(`Sign-in failed: ${error.message || 'Check your connection'}`);
         setTimeout(() => setAuthError(null), 5000);
