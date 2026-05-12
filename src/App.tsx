@@ -80,7 +80,6 @@ export default function App() {
   const [selectedSubjectId, setSelectedSubjectId] = useState<string>('all');
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
   const [collapsedSubjects, setCollapsedSubjects] = useState<Record<string, boolean>>({});
-  const [hideFinishedPerSubject, setHideFinishedPerSubject] = useState<Record<string, boolean>>({});
 
   // 1. Initial connection test & Auth listener
   useEffect(() => {
@@ -186,13 +185,6 @@ export default function App() {
 
   const toggleSubject = (subjectId: string) => {
     setCollapsedSubjects(prev => ({
-      ...prev,
-      [subjectId]: !prev[subjectId]
-    }));
-  };
-
-  const toggleHideFinishedSubject = (subjectId: string) => {
-    setHideFinishedPerSubject(prev => ({
       ...prev,
       [subjectId]: !prev[subjectId]
     }));
@@ -532,7 +524,6 @@ export default function App() {
           };
           const color = colorMap[subject.id] || 'emerald';
           const isCollapsed = collapsedSubjects[subject.id];
-          const hideFinished = hideFinishedPerSubject[subject.id];
           
           return (
             <div key={subject.id} className="glass-panel p-6 flex flex-col h-fit hover:bg-white transition-all duration-300 group bg-white shadow-sm border-slate-100">
@@ -542,7 +533,7 @@ export default function App() {
                   className="flex items-center gap-4 text-left group/title"
                 >
                   <div className={`w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-black font-bold text-lg shadow-sm border border-slate-100 group-hover/title:border-slate-300 transition-all`}>
-                    {isCollapsed ? <ChevronDown className="w-6 h-6" /> : subject.id.split('-').map(p => p[0].toUpperCase()).join('')}
+                    {subject.id.split('-').map(p => p[0].toUpperCase()).join('')}
                   </div>
                   <div className="flex flex-col">
                     <h2 className="text-xl font-semibold text-black group-hover/title:text-zinc-600 transition-colors">{subject.title}</h2>
@@ -551,15 +542,15 @@ export default function App() {
                 </button>
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => toggleHideFinishedSubject(subject.id)}
+                    onClick={() => toggleSubject(subject.id)}
                     className={`p-2 rounded-lg border transition-all ${
-                      hideFinished 
-                      ? 'bg-black text-white border-black' 
+                      isCollapsed 
+                      ? 'bg-black text-white border-black ring-2 ring-black/10' 
                       : 'bg-white border-slate-200 text-slate-400 hover:text-black'
                     }`}
-                    title={hideFinished ? "Show Finished" : "Hide Finished"}
+                    title={isCollapsed ? "Show Topics" : "Hide Topics"}
                   >
-                    {hideFinished ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                    {isCollapsed ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                   </button>
                   <button
                     onClick={() => completeAllSubject(subject.id)}
@@ -595,8 +586,8 @@ export default function App() {
                         return (
                           <AnimatePresence key={cat.name}>
                             {(() => {
-                              const visibleTopics = cat.topics.filter(t => !(hideFinished && completedTopics[t.id]));
-                              if (visibleTopics.length === 0 && hideFinished) return null;
+                              const visibleTopics = cat.topics.filter(t => !(hideCompletedSubjects && completedTopics[t.id]));
+                              if (visibleTopics.length === 0 && hideCompletedSubjects) return null;
 
                               return (
                                 <motion.div 
