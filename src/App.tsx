@@ -297,6 +297,9 @@ export default function App() {
     let completed = 0;
 
     syllabusData.forEach(subject => {
+      // Filter by group if selection is not 'all'
+      if (selectedGroup !== 'all' && subject.group !== selectedGroup) return;
+
       subject.categories.forEach(cat => {
         total += cat.topics.length;
         cat.topics.forEach(topic => {
@@ -307,7 +310,7 @@ export default function App() {
 
     const percentage = total > 0 ? (completed / total) * 100 : 0;
     return { total, completed, remaining: total - completed, percentage };
-  }, [completedTopics]);
+  }, [completedTopics, selectedGroup]);
 
   const filteredSyllabus = useMemo(() => {
     return syllabusData.filter(subject => {
@@ -446,11 +449,11 @@ export default function App() {
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Total Topics', value: stats.total, border: 'border-l-emerald-500' },
+          { label: selectedGroup === 'all' ? 'Total Topics' : `${selectedGroup} Topics`, value: stats.total, border: 'border-l-emerald-500' },
           { label: 'Completed', value: stats.completed, border: 'border-l-cyan-500' },
           { label: 'Remaining', value: stats.remaining, border: 'border-l-amber-500' },
           { 
-            label: 'Total Progress', 
+            label: selectedGroup === 'all' ? 'Overall Progress' : `${selectedGroup} Progress`, 
             value: `${Math.round(stats.percentage)}%`, 
             border: 'border-l-black', 
             progress: stats.percentage 
