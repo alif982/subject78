@@ -80,6 +80,7 @@ export default function App() {
   const [selectedSubjectId, setSelectedSubjectId] = useState<string>('all');
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
   const [collapsedSubjects, setCollapsedSubjects] = useState<Record<string, boolean>>({});
+  const [hideFinishedPerSubject, setHideFinishedPerSubject] = useState<Record<string, boolean>>({});
 
   // 1. Initial connection test & Auth listener
   useEffect(() => {
@@ -185,6 +186,13 @@ export default function App() {
 
   const toggleSubject = (subjectId: string) => {
     setCollapsedSubjects(prev => ({
+      ...prev,
+      [subjectId]: !prev[subjectId]
+    }));
+  };
+
+  const toggleHideFinishedSubject = (subjectId: string) => {
+    setHideFinishedPerSubject(prev => ({
       ...prev,
       [subjectId]: !prev[subjectId]
     }));
@@ -339,8 +347,8 @@ export default function App() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 px-2">
         <div className="flex flex-col">
           <h1 className="text-3xl font-bold tracking-tight text-black flex items-center gap-3">
-            <span className="w-2.5 h-10 bg-emerald-500 rounded-full"></span>
-            Admission Tracker
+            <span className="w-2.5 h-10 bg-black rounded-full"></span>
+            Admission Syllabus Tracker
           </h1>
           <p className="text-slate-500 text-sm mt-1">Syllabus Master</p>
         </div>
@@ -373,7 +381,7 @@ export default function App() {
               ) : (
                 <button
                   onClick={handleSignIn}
-                  className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 transition-all shadow-md"
+                  className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-xl text-sm font-bold hover:bg-zinc-800 transition-all shadow-md"
                 >
                   <LogIn className="w-4 h-4" />
                   Sign In
@@ -524,6 +532,7 @@ export default function App() {
           };
           const color = colorMap[subject.id] || 'emerald';
           const isCollapsed = collapsedSubjects[subject.id];
+          const hideFinished = hideFinishedPerSubject[subject.id];
           
           return (
             <div key={subject.id} className="glass-panel p-6 flex flex-col h-fit hover:bg-white transition-all duration-300 group bg-white shadow-sm border-slate-100">
@@ -536,11 +545,22 @@ export default function App() {
                     {isCollapsed ? <ChevronDown className="w-6 h-6" /> : subject.id.split('-').map(p => p[0].toUpperCase()).join('')}
                   </div>
                   <div className="flex flex-col">
-                    <h2 className="text-xl font-semibold text-black group-hover/title:text-indigo-600 transition-colors">{subject.title}</h2>
+                    <h2 className="text-xl font-semibold text-black group-hover/title:text-zinc-600 transition-colors">{subject.title}</h2>
                     <span className="text-[10px] font-black text-black uppercase tracking-widest">{Math.round(subPercentage)}% COMPLETED</span>
                   </div>
                 </button>
                 <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => toggleHideFinishedSubject(subject.id)}
+                    className={`p-2 rounded-lg border transition-all ${
+                      hideFinished 
+                      ? 'bg-black text-white border-black' 
+                      : 'bg-white border-slate-200 text-slate-400 hover:text-black'
+                    }`}
+                    title={hideFinished ? "Show Finished" : "Hide Finished"}
+                  >
+                    {hideFinished ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                  </button>
                   <button
                     onClick={() => completeAllSubject(subject.id)}
                     className={`text-[10px] uppercase font-bold text-black bg-white px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-all border border-slate-200`}
@@ -573,54 +593,68 @@ export default function App() {
                         const hasMultipleCategories = subject.categories.length > 1;
                         
                         return (
-                          <div key={cat.name} className="space-y-2 border-b border-slate-50 last:border-0 pb-4">
-                            {hasMultipleCategories && (
-                              <button 
-                                onClick={() => toggleCategory(categoryKey)}
-                                className="w-full flex items-center justify-between text-[10px] font-bold text-black hover:opacity-70 transition-colors uppercase tracking-[0.2em] py-2 cursor-pointer group/cat"
-                              >
-                                <div className="flex items-center gap-2">
-                                  <span className={`w-1 h-1 rounded-full bg-black`}></span>
-                                  {cat.name}
-                                  <span className="opacity-40 ml-1">({cat.topics.length})</span>
-                                </div>
-                                {isCatCollapsed ? <ChevronDown className="w-3 h-3" /> : <ChevronUp className="w-3 h-3" />}
-                              </button>
-                            )}
-                            
-                            {(isCatCollapsed && hasMultipleCategories) ? null : (
-                              <motion.div 
-                                initial={hasMultipleCategories ? { opacity: 0, height: 0 } : false}
-                                animate={{ opacity: 1, height: 'auto' }}
-                                exit={{ opacity: 0, height: 0 }}
-                                className="grid gap-2 overflow-hidden"
-                              >
-                                {cat.topics.map(topic => {
-                                  const isDone = completedTopics[topic.id];
-                                  return (
-                                    <button
-                                      key={topic.id}
-                                      onClick={() => toggleTopic(topic.id)}
-                                      className={`w-full flex items-center gap-4 p-3 rounded-xl border transition-all duration-200 text-left group/topic ${
-                                        isDone 
-                                        ? `bg-emerald-50 border-emerald-100 text-emerald-900 shadow-sm` 
-                                        : 'bg-white border-slate-100 text-black hover:border-slate-300 hover:bg-slate-50'
-                                      }`}
+                          <AnimatePresence key={cat.name}>
+                            {(() => {
+                              const visibleTopics = cat.topics.filter(t => !(hideFinished && completedTopics[t.id]));
+                              if (visibleTopics.length === 0 && hideFinished) return null;
+
+                              return (
+                                <motion.div 
+                                  initial={{ opacity: 0 }}
+                                  animate={{ opacity: 1 }}
+                                  exit={{ opacity: 0 }}
+                                  className="space-y-2 border-b border-slate-50 last:border-0 pb-4"
+                                >
+                                  {hasMultipleCategories && (
+                                    <button 
+                                      onClick={() => toggleCategory(categoryKey)}
+                                      className="w-full flex items-center justify-between text-[10px] font-bold text-black hover:opacity-70 transition-colors uppercase tracking-[0.2em] py-2 cursor-pointer group/cat"
                                     >
-                                      <div className={`w-5 h-5 rounded border flex items-center justify-center transition-all duration-300 ${
-                                        isDone 
-                                        ? `border-emerald-500 bg-emerald-500 text-white` 
-                                        : 'border-slate-300 group-hover/topic:border-slate-500'
-                                      }`}>
-                                        {isDone && <CheckCircle2 className="w-4 h-4" />}
+                                      <div className="flex items-center gap-2">
+                                        <span className={`w-1 h-1 rounded-full bg-black`}></span>
+                                        {cat.name}
+                                        <span className="opacity-40 ml-1">({visibleTopics.length})</span>
                                       </div>
-                                      <span className="text-sm font-medium">{topic.name}</span>
+                                      {isCatCollapsed ? <ChevronDown className="w-3 h-3" /> : <ChevronUp className="w-3 h-3" />}
                                     </button>
-                                  );
-                                })}
-                              </motion.div>
-                            )}
-                          </div>
+                                  )}
+                                  
+                                  {(isCatCollapsed && hasMultipleCategories) ? null : (
+                                    <motion.div 
+                                      initial={hasMultipleCategories ? { opacity: 0, height: 0 } : false}
+                                      animate={{ opacity: 1, height: 'auto' }}
+                                      exit={{ opacity: 0, height: 0 }}
+                                      className="grid gap-2 overflow-hidden"
+                                    >
+                                      {visibleTopics.map(topic => {
+                                        const isDone = completedTopics[topic.id];
+                                        return (
+                                          <button
+                                            key={topic.id}
+                                            onClick={() => toggleTopic(topic.id)}
+                                            className={`w-full flex items-center gap-4 p-3 rounded-xl border transition-all duration-200 text-left group/topic ${
+                                              isDone 
+                                              ? `bg-emerald-50 border-emerald-100 text-emerald-900 shadow-sm` 
+                                              : 'bg-white border-slate-100 text-black hover:border-slate-300 hover:bg-slate-50'
+                                            }`}
+                                          >
+                                            <div className={`w-5 h-5 rounded border flex items-center justify-center transition-all duration-300 ${
+                                              isDone 
+                                              ? `border-emerald-500 bg-emerald-500 text-white` 
+                                              : 'border-slate-300 group-hover/topic:border-slate-500'
+                                            }`}>
+                                              {isDone && <CheckCircle2 className="w-4 h-4" />}
+                                            </div>
+                                            <span className="text-sm font-medium">{topic.name}</span>
+                                          </button>
+                                        );
+                                      })}
+                                    </motion.div>
+                                  )}
+                                </motion.div>
+                              );
+                            })()}
+                          </AnimatePresence>
                         );
                       })}
                     </AnimatePresence>
