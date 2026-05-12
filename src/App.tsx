@@ -78,6 +78,7 @@ export default function App() {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [hideCompletedSubjects, setHideCompletedSubjects] = useState(false);
+  const [selectedGroup, setSelectedGroup] = useState<string>('all');
   const [selectedSubjectId, setSelectedSubjectId] = useState<string>('all');
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
   const [collapsedSubjects, setCollapsedSubjects] = useState<Record<string, boolean>>({});
@@ -313,6 +314,9 @@ export default function App() {
       // Hide subjects manually hidden
       if (hiddenSubjects[subject.id]) return false;
 
+      // Filter by group
+      if (selectedGroup !== 'all' && subject.group !== selectedGroup) return false;
+
       // Filter by subject selection
       if (selectedSubjectId !== 'all' && subject.id !== selectedSubjectId) return false;
 
@@ -343,7 +347,7 @@ export default function App() {
         topics: cat.topics.filter(t => t.name.toLowerCase().includes(searchQuery.toLowerCase()))
       })).filter(cat => cat.topics.length > 0)
     }));
-  }, [searchQuery, hideCompletedSubjects, completedTopics, selectedSubjectId]);
+  }, [searchQuery, hideCompletedSubjects, completedTopics, selectedSubjectId, selectedGroup]);
 
   const quote = useMemo(() => {
     const today = new Date().toDateString();
@@ -472,231 +476,267 @@ export default function App() {
       </div>
 
       {/* Subject Filter Bar */}
-      <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-        <div className="flex flex-wrap gap-2 p-1 bg-slate-200/50 rounded-2xl w-fit">
-          <button
-            onClick={() => setSelectedSubjectId('all')}
-            className={`px-4 py-2 rounded-xl text-xs font-black transition-all ${
-              selectedSubjectId === 'all' 
-              ? 'bg-white text-black shadow-sm' 
-              : 'text-slate-500 hover:text-black'
-            }`}
-          >
-            All
-          </button>
-          {syllabusData.map(s => (
-            <button
-              key={s.id}
-              onClick={() => setSelectedSubjectId(s.id)}
-              className={`px-4 py-2 rounded-xl text-xs font-black transition-all ${
-                selectedSubjectId === s.id 
-                ? 'bg-white text-black shadow-sm' 
-                : 'text-slate-500 hover:text-black'
-              }`}
-            >
-              {s.title}
-            </button>
-          ))}
-        </div>
-
-        <div className="flex flex-wrap gap-2 items-center">
-          <button
-            onClick={() => setHideCompletedSubjects(!hideCompletedSubjects)}
-            className={`px-5 py-2.5 rounded-xl border flex items-center gap-2 text-sm font-black transition-all shadow-sm ${
-              hideCompletedSubjects 
-              ? 'bg-black text-white border-black ring-2 ring-black/10' 
-              : 'bg-white border-slate-200 text-black hover:bg-slate-50'
-            }`}
-          >
-            {hideCompletedSubjects ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-            {hideCompletedSubjects ? 'Hiding Finished' : 'Hide Finished'}
-          </button>
-
-          <div className="flex gap-1 bg-slate-200/50 p-1 rounded-xl">
-            <button
-              onClick={() => toggleAllSubjects(true)}
-              className="p-2 hover:bg-white rounded-lg transition-all text-black"
-              title="Collapse All"
-            >
-              <ChevronUp className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => toggleAllSubjects(false)}
-              className="p-2 hover:bg-white rounded-lg transition-all text-black"
-              title="Expand All"
-            >
-              <ChevronDown className="w-4 h-4" />
-            </button>
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div className="flex flex-wrap gap-2 p-1 bg-slate-200/50 rounded-2xl w-fit">
+            {['all', 'General', 'Science'].map(group => (
+              <button
+                key={group}
+                onClick={() => {
+                  setSelectedGroup(group);
+                  setSelectedSubjectId('all');
+                }}
+                className={`px-4 py-2 rounded-xl text-xs font-black transition-all uppercase tracking-widest ${
+                  selectedGroup === group 
+                  ? 'bg-black text-white shadow-md' 
+                  : 'text-slate-500 hover:text-black'
+                }`}
+              >
+                {group}
+              </button>
+            ))}
           </div>
 
-          {(Object.keys(hiddenSubjects).some(id => hiddenSubjects[id])) && (
+          <div className="flex flex-wrap gap-2 items-center">
             <button
-              onClick={() => setHiddenSubjects({})}
-              className="px-3 py-2 rounded-xl bg-slate-100 text-slate-600 text-[10px] font-black uppercase tracking-wider hover:bg-slate-200 transition-all flex items-center gap-1"
+              onClick={() => setHideCompletedSubjects(!hideCompletedSubjects)}
+              className={`px-5 py-2.5 rounded-xl border flex items-center gap-2 text-sm font-black transition-all shadow-sm ${
+                hideCompletedSubjects 
+                ? 'bg-black text-white border-black ring-2 ring-black/10' 
+                : 'bg-white border-slate-200 text-black hover:bg-slate-50'
+              }`}
             >
-              <RotateCcw className="w-3 h-3" />
-              Reset Hidden
+              {hideCompletedSubjects ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              {hideCompletedSubjects ? 'Hiding Finished' : 'Hide Finished'}
             </button>
-          )}
+
+            <div className="flex gap-1 bg-slate-200/50 p-1 rounded-xl">
+              <button
+                onClick={() => toggleAllSubjects(true)}
+                className="p-2 hover:bg-white rounded-lg transition-all text-black"
+                title="Collapse All"
+              >
+                <ChevronUp className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => toggleAllSubjects(false)}
+                className="p-2 hover:bg-white rounded-lg transition-all text-black"
+                title="Expand All"
+              >
+                <ChevronDown className="w-4 h-4" />
+              </button>
+            </div>
+
+            {(Object.keys(hiddenSubjects).some(id => hiddenSubjects[id])) && (
+              <button
+                onClick={() => setHiddenSubjects({})}
+                className="px-3 py-2 rounded-xl bg-slate-100 text-slate-600 text-[10px] font-black uppercase tracking-wider hover:bg-slate-200 transition-all flex items-center gap-1"
+              >
+                <RotateCcw className="w-3 h-3" />
+                Reset Hidden
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Individual Subject Quick Filter (Only shown if a specific group is selected or all) */}
+        <div className="flex flex-wrap gap-2 items-center pb-2 overflow-x-auto no-scrollbar">
+          <button
+            onClick={() => setSelectedSubjectId('all')}
+            className={`whitespace-nowrap px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all border ${
+              selectedSubjectId === 'all'
+              ? 'bg-slate-800 text-white border-slate-800'
+              : 'bg-white text-slate-500 border-slate-200 hover:border-slate-400'
+            }`}
+          >
+            All Subjects
+          </button>
+          {syllabusData
+            .filter(s => selectedGroup === 'all' || s.group === selectedGroup)
+            .map(s => (
+              <button
+                key={s.id}
+                onClick={() => setSelectedSubjectId(s.id)}
+                className={`whitespace-nowrap px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all border ${
+                  selectedSubjectId === s.id
+                  ? 'bg-slate-800 text-white border-slate-800'
+                  : 'bg-white text-slate-500 border-slate-200 hover:border-slate-400'
+                }`}
+              >
+                {s.title}
+              </button>
+            ))}
         </div>
       </div>
 
-      {/* Subjects Container */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-        {filteredSyllabus.map((subject) => {
-          let subTotal = 0;
-          let subCompleted = 0;
-          subject.categories.forEach(cat => {
-            subTotal += cat.topics.length;
-            cat.topics.forEach(topic => {
-              if (completedTopics[topic.id]) subCompleted++;
-            });
-          });
-          const subPercentage = subTotal > 0 ? (subCompleted / subTotal) * 100 : 0;
-          
-          const colorMap: Record<string, string> = {
-            'bangla-1': 'emerald',
-            'bangla-2': 'amber',
-            'english-2': 'cyan',
-            'gk': 'indigo'
-          };
-          const color = colorMap[subject.id] || 'emerald';
-          const isCollapsed = collapsedSubjects[subject.id];
+      {/* Subjects Container - Grouped Sections */}
+      <div className="flex flex-col gap-12">
+        {['General', 'Science'].map(groupName => {
+          const subjectsInGroup = filteredSyllabus.filter(s => s.group === groupName);
+          if (subjectsInGroup.length === 0) return null;
           
           return (
-            <div key={subject.id} className="glass-panel p-6 flex flex-col h-fit hover:bg-white transition-all duration-300 group bg-white shadow-sm border-slate-100">
-              <div className="flex justify-between items-start mb-5">
-                <button 
-                  onClick={() => toggleSubject(subject.id)}
-                  className="flex items-center gap-4 text-left group/title"
-                >
-                  <div className={`w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-black font-bold text-lg shadow-sm border border-slate-100 group-hover/title:border-slate-300 transition-all`}>
-                    {subject.id.split('-').map(p => p[0].toUpperCase()).join('')}
-                  </div>
-                  <div className="flex flex-col">
-                    <h2 className="text-xl font-semibold text-black group-hover/title:text-zinc-600 transition-colors">{subject.title}</h2>
-                    <span className="text-[10px] font-black text-black uppercase tracking-widest">{Math.round(subPercentage)}% COMPLETED</span>
-                  </div>
-                </button>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => toggleHideSubject(subject.id)}
-                    className="p-2 rounded-lg border border-slate-200 text-slate-400 hover:text-red-500 hover:border-red-100 transition-all"
-                    title="Hide Subject Card"
-                  >
-                    <EyeOff className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    onClick={() => toggleSubject(subject.id)}
-                    className={`p-2 rounded-lg border transition-all ${
-                      isCollapsed 
-                      ? 'bg-black text-white border-black ring-2 ring-black/10' 
-                      : 'bg-white border-slate-200 text-slate-400 hover:text-black'
-                    }`}
-                    title={isCollapsed ? "Show Topics" : "Minimize Topics"}
-                  >
-                    {isCollapsed ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronUp className="w-3.5 h-3.5" />}
-                  </button>
-                  <button
-                    onClick={() => completeAllSubject(subject.id)}
-                    className={`text-[10px] uppercase font-bold text-black bg-white px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-all border border-slate-200`}
-                  >
-                    Complete All
-                  </button>
-                </div>
+            <div key={groupName} className="flex flex-col gap-6">
+              <div className="flex items-center gap-4 px-2">
+                <h2 className="text-xl font-black uppercase tracking-[0.3em] text-slate-400">{groupName}</h2>
+                <div className="h-px flex-1 bg-slate-200"></div>
+                <span className="text-[10px] font-bold text-slate-400 px-3 py-1 bg-white border border-slate-100 rounded-full">
+                  {subjectsInGroup.length} {subjectsInGroup.length === 1 ? 'Subject' : 'Subjects'}
+                </span>
               </div>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                {subjectsInGroup.map((subject) => {
+                  let subTotal = 0;
+                  let subCompleted = 0;
+                  subject.categories.forEach(cat => {
+                    subTotal += cat.topics.length;
+                    cat.topics.forEach(topic => {
+                      if (completedTopics[topic.id]) subCompleted++;
+                    });
+                  });
+                  const subPercentage = subTotal > 0 ? (subCompleted / subTotal) * 100 : 0;
+                  
+                  const isCollapsed = collapsedSubjects[subject.id];
+                  
+                  return (
+                    <div key={subject.id} className="glass-panel p-6 flex flex-col h-fit hover:bg-white transition-all duration-300 group bg-white shadow-sm border-slate-100">
+                      <div className="flex justify-between items-start mb-5">
+                        <button 
+                          onClick={() => toggleSubject(subject.id)}
+                          className="flex items-center gap-4 text-left group/title"
+                        >
+                          <div className={`w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-black font-bold text-lg shadow-sm border border-slate-100 group-hover/title:border-slate-300 transition-all`}>
+                            {subject.id.split('-').map(p => p[0].toUpperCase()).join('')}
+                          </div>
+                          <div className="flex flex-col">
+                            <h2 className="text-xl font-semibold text-black group-hover/title:text-zinc-600 transition-colors">{subject.title}</h2>
+                            <span className="text-[10px] font-black text-black uppercase tracking-widest">{Math.round(subPercentage)}% COMPLETED</span>
+                          </div>
+                        </button>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => toggleHideSubject(subject.id)}
+                            className="p-2 rounded-lg border border-slate-200 text-slate-400 hover:text-red-500 hover:border-red-100 transition-all"
+                            title="Hide Subject Card"
+                          >
+                            <EyeOff className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => toggleSubject(subject.id)}
+                            className={`p-2 rounded-lg border transition-all ${
+                              isCollapsed 
+                              ? 'bg-black text-white border-black ring-2 ring-black/10' 
+                              : 'bg-white border-slate-200 text-slate-400 hover:text-black'
+                            }`}
+                            title={isCollapsed ? "Show Topics" : "Minimize Topics"}
+                          >
+                            {isCollapsed ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronUp className="w-3.5 h-3.5" />}
+                          </button>
+                          <button
+                            onClick={() => completeAllSubject(subject.id)}
+                            className={`text-[10px] uppercase font-bold text-black bg-white px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-all border border-slate-200`}
+                          >
+                            Complete All
+                          </button>
+                        </div>
+                      </div>
 
-              {!isCollapsed && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                >
-                  <div className="w-full h-1.5 bg-slate-100 rounded-full mb-6 relative">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${subPercentage}%` }}
-                      className={`h-full bg-black rounded-full`}
-                      transition={{ duration: 0.8 }}
-                    />
-                  </div>
+                      {!isCollapsed && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                        >
+                          <div className="w-full h-1.5 bg-slate-100 rounded-full mb-6 relative">
+                            <motion.div
+                              initial={{ width: 0 }}
+                              animate={{ width: `${subPercentage}%` }}
+                              className={`h-full bg-black rounded-full`}
+                              transition={{ duration: 0.8 }}
+                            />
+                          </div>
 
-                  <div className="topic-list overflow-y-auto flex-1 pr-3 space-y-2 max-h-[400px]">
-                    <AnimatePresence>
-                      {subject.categories.map((cat) => {
-                        const categoryKey = `${subject.id}-${cat.name}`;
-                        const isCatCollapsed = expandedCategories[categoryKey];
-                        const hasMultipleCategories = subject.categories.length > 1;
-                        
-                        return (
-                          <AnimatePresence key={cat.name}>
-                            {(() => {
-                              const visibleTopics = cat.topics.filter(t => !(hideCompletedSubjects && completedTopics[t.id]));
-                              if (visibleTopics.length === 0 && hideCompletedSubjects) return null;
+                          <div className="topic-list overflow-y-auto flex-1 pr-3 space-y-2 max-h-[400px]">
+                            <AnimatePresence>
+                              {subject.categories.map((cat) => {
+                                const categoryKey = `${subject.id}-${cat.name}`;
+                                const isCatCollapsed = expandedCategories[categoryKey];
+                                const hasMultipleCategories = subject.categories.length > 1;
+                                
+                                return (
+                                  <AnimatePresence key={cat.name}>
+                                    {(() => {
+                                      const visibleTopics = cat.topics.filter(t => !(hideCompletedSubjects && completedTopics[t.id]));
+                                      if (visibleTopics.length === 0 && hideCompletedSubjects) return null;
 
-                              return (
-                                <motion.div 
-                                  initial={{ opacity: 0 }}
-                                  animate={{ opacity: 1 }}
-                                  exit={{ opacity: 0 }}
-                                  className="space-y-2 border-b border-slate-50 last:border-0 pb-4"
-                                >
-                                  {hasMultipleCategories && (
-                                    <button 
-                                      onClick={() => toggleCategory(categoryKey)}
-                                      className="w-full flex items-center justify-between text-[10px] font-bold text-black hover:opacity-70 transition-colors uppercase tracking-[0.2em] py-2 cursor-pointer group/cat"
-                                    >
-                                      <div className="flex items-center gap-2">
-                                        <span className={`w-1 h-1 rounded-full bg-black`}></span>
-                                        {cat.name}
-                                        <span className="opacity-40 ml-1">({visibleTopics.length})</span>
-                                      </div>
-                                      {isCatCollapsed ? <ChevronDown className="w-3 h-3" /> : <ChevronUp className="w-3 h-3" />}
-                                    </button>
-                                  )}
-                                  
-                                  {(isCatCollapsed && hasMultipleCategories) ? null : (
-                                    <motion.div 
-                                      initial={hasMultipleCategories ? { opacity: 0, height: 0 } : false}
-                                      animate={{ opacity: 1, height: 'auto' }}
-                                      exit={{ opacity: 0, height: 0 }}
-                                      className="grid gap-2 overflow-hidden"
-                                    >
-                                      {visibleTopics.map(topic => {
-                                        const isDone = completedTopics[topic.id];
-                                        return (
-                                          <button
-                                            key={topic.id}
-                                            onClick={() => toggleTopic(topic.id)}
-                                            className={`w-full flex items-center gap-4 p-3 rounded-xl border transition-all duration-200 text-left group/topic ${
-                                              isDone 
-                                              ? `bg-emerald-50 border-emerald-100 text-emerald-900 shadow-sm` 
-                                              : 'bg-white border-slate-100 text-black hover:border-slate-300 hover:bg-slate-50'
-                                            }`}
-                                          >
-                                            <div className={`w-5 h-5 rounded border flex items-center justify-center transition-all duration-300 ${
-                                              isDone 
-                                              ? `border-emerald-500 bg-emerald-500 text-white` 
-                                              : 'border-slate-300 group-hover/topic:border-slate-500'
-                                            }`}>
-                                              {isDone && <CheckCircle2 className="w-4 h-4" />}
-                                            </div>
-                                            <span className="text-sm font-medium">{topic.name}</span>
-                                          </button>
-                                        );
-                                      })}
-                                    </motion.div>
-                                  )}
-                                </motion.div>
-                              );
-                            })()}
-                          </AnimatePresence>
-                        );
-                      })}
-                    </AnimatePresence>
-                  </div>
-                </motion.div>
-              )}
+                                      return (
+                                        <motion.div 
+                                          initial={{ opacity: 0 }}
+                                          animate={{ opacity: 1 }}
+                                          exit={{ opacity: 0 }}
+                                          className="space-y-2 border-b border-slate-50 last:border-0 pb-4"
+                                        >
+                                          {hasMultipleCategories && (
+                                            <button 
+                                              onClick={() => toggleCategory(categoryKey)}
+                                              className="w-full flex items-center justify-between text-[10px] font-bold text-black hover:opacity-70 transition-colors uppercase tracking-[0.2em] py-2 cursor-pointer group/cat"
+                                            >
+                                              <div className="flex items-center gap-2">
+                                                <span className={`w-1 h-1 rounded-full bg-black`}></span>
+                                                {cat.name}
+                                                <span className="opacity-40 ml-1">({visibleTopics.length})</span>
+                                              </div>
+                                              {isCatCollapsed ? <ChevronDown className="w-3 h-3" /> : <ChevronUp className="w-3 h-3" />}
+                                            </button>
+                                          )}
+                                          
+                                          {(isCatCollapsed && hasMultipleCategories) ? null : (
+                                            <motion.div 
+                                              initial={hasMultipleCategories ? { opacity: 0, height: 0 } : false}
+                                              animate={{ opacity: 1, height: 'auto' }}
+                                              exit={{ opacity: 0, height: 0 }}
+                                              className="grid gap-2 overflow-hidden"
+                                            >
+                                              {visibleTopics.map(topic => {
+                                                const isDone = completedTopics[topic.id];
+                                                return (
+                                                  <button
+                                                    key={topic.id}
+                                                    onClick={() => toggleTopic(topic.id)}
+                                                    className={`w-full flex items-center gap-4 p-3 rounded-xl border transition-all duration-200 text-left group/topic ${
+                                                      isDone 
+                                                      ? `bg-emerald-50 border-emerald-100 text-emerald-900 shadow-sm` 
+                                                      : 'bg-white border-slate-100 text-black hover:border-slate-300 hover:bg-slate-50'
+                                                    }`}
+                                                  >
+                                                    <div className={`w-5 h-5 rounded border flex items-center justify-center transition-all duration-300 ${
+                                                      isDone 
+                                                      ? `border-emerald-500 bg-emerald-500 text-white` 
+                                                      : 'border-slate-300 group-hover/topic:border-slate-500'
+                                                    }`}>
+                                                      {isDone && <CheckCircle2 className="w-4 h-4" />}
+                                                    </div>
+                                                    <span className="text-sm font-medium">{topic.name}</span>
+                                                  </button>
+                                                );
+                                              })}
+                                            </motion.div>
+                                          )}
+                                        </motion.div>
+                                      );
+                                    })()}
+                                  </AnimatePresence>
+                                );
+                              })}
+                            </AnimatePresence>
+                          </div>
+                        </motion.div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           );
         })}

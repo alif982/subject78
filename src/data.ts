@@ -8,6 +8,7 @@ export interface Subject {
   id: string;
   title: string;
   icon: string;
+  group?: string;
   categories: {
     name: string;
     topics: Topic[];
@@ -19,6 +20,7 @@ export const syllabusData: Subject[] = [
     id: 'bangla-1',
     title: 'Bangla 1st Paper',
     icon: 'BookOpen',
+    group: 'General',
     categories: [
       {
         name: 'পাঠ্যসূচি',
@@ -47,6 +49,7 @@ export const syllabusData: Subject[] = [
     id: 'bangla-2',
     title: 'Bangla 2nd Paper',
     icon: 'PenTool',
+    group: 'General',
     categories: [
       {
         name: 'ব্যাকরণ ও অন্যান্য',
@@ -100,6 +103,7 @@ export const syllabusData: Subject[] = [
     id: 'english-2',
     title: 'English 2nd Paper',
     icon: 'Languages',
+    group: 'General',
     categories: [
       {
         name: 'Syllabus',
@@ -144,6 +148,7 @@ export const syllabusData: Subject[] = [
     id: 'gk',
     title: 'GK (General Knowledge)',
     icon: 'Globe',
+    group: 'General',
     categories: [
       {
         name: 'Bangladesh Affairs',
@@ -203,6 +208,185 @@ export const syllabusData: Subject[] = [
           { id: 'gki7', name: 'আন্তর্জাতিক যুদ্ধ ও চুক্তি' },
           { id: 'gki8', name: 'জাতিসংঘ' },
           { id: 'gki9', name: 'বিশ্বখ্যাত স্থান ও স্থাপনা' }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'physics-1',
+    title: 'Physics 1st Paper',
+    icon: 'Zap',
+    group: 'Science',
+    categories: [
+      {
+        name: 'Syllabus',
+        topics: [
+          { id: 'p1t1', name: 'Physical World and Measurement (ভৌত জগৎ ও পরিমাপ)' },
+          { id: 'p1t2', name: 'Vectors (ভেক্টর)' },
+          { id: 'p1t3', name: 'Dynamics (গতিবিদ্যা)' },
+          { id: 'p1t4', name: 'Newtonian Mechanics (নিউটনিয়ান বলবিদ্যা)' },
+          { id: 'p1t5', name: 'Work, Energy & Power (কাজ, শক্তি ও ক্ষমতা)' },
+          { id: 'p1t6', name: 'Gravitation and Gravity (মহাকর্ষ ও অভিকর্ষ)' },
+          { id: 'p1t7', name: 'Structural Properties of Matter (পদার্থের গাঠনিক ধর্ম)' },
+          { id: 'p1t8', name: 'Periodic Motion (পর্যাবৃত্ত গতি)' },
+          { id: 'p1t9', name: 'Wave (তরঙ্গ)' },
+          { id: 'p1t10', name: 'Ideal Gas and Kinetic Theory of Gases (আদর্শ গ্যাস ও গ্যাসের গতিতত্ত্ব)' }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'physics-2',
+    title: 'Physics 2nd Paper',
+    icon: 'Zap',
+    group: 'Science',
+    categories: [
+      {
+        name: 'Syllabus',
+        topics: [
+          { id: 'p2t1', name: 'Thermodynamics (তাপগতবিদ্যা)' },
+          { id: 'p2t2', name: 'Static Electricity (স্থির তড়িৎ)' },
+          { id: 'p2t3', name: 'Current Electricity (চল তড়িৎ)' },
+          { id: 'p2t4', name: 'Magnetic Effects of Electric Current and Magnetism (তড়িৎ প্রবাহের চৌম্বক ক্রিয়া ও চৌম্বকত্ব)' },
+          { id: 'p2t5', name: 'Electromagnetic Induction and Alternating Current (তড়িতচৌম্বকীয় আবশ ও পরিবর্তী প্রবাহ)' },
+          { id: 'p2t6', name: 'Geometrical Optics (জ্যামিতিক আলোকবিজ্ঞান)' },
+          { id: 'p2t7', name: 'Physical Optics (ভৌত আলোকবিজ্ঞান)' },
+          { id: 'p2t8', name: 'Introduction to Modern Physics (আধুনিক পদার্থবিজ্ঞান)' },
+          { id: 'p2t9', name: 'Atomic Model and Nuclear Physics (পরমাণুর মডেল এবং নিউক্লিয়ার পদার্থবিজ্ঞান)' },
+          { id: 'p2t10', name: 'Semiconductor and Electronics (সেমিকন্ডাক্টর ও ইলেক্ট্রনিক্স)' },
+          { id: 'p2t11', name: 'Astronomy (জ্যোতির্বিজ্ঞান)' }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'chemistry-1',
+    title: 'Chemistry 1st Paper',
+    icon: 'FlaskConical',
+    group: 'Science',
+    categories: [
+      {
+        name: 'Syllabus',
+        topics: [
+          { id: 'c1t1', name: 'Safe use of Laboratory (ল্যাবরেটরির নিরাপদ ব্যাবহার)' },
+          { id: 'c1t2', name: 'Qualitative Chemistry (গুণগত রসায়ন)' },
+          { id: 'c1t3', name: 'Perhodic Properties of Elements & Chemical Bonding (মৌলের পর্যায়বৃত্ত ধর্ম ও রাসায়নিক বন্ধন)' },
+          { id: 'c1t4', name: 'Chemical Changes (রাসায়নিক পরিবর্তন)' },
+          { id: 'c1t5', name: 'Application Oriented Chemistry (কর্মমুখী রসায়ন)' }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'chemistry-2',
+    title: 'Chemistry 2nd Paper',
+    icon: 'FlaskConical',
+    group: 'Science',
+    categories: [
+      {
+        name: 'Syllabus',
+        topics: [
+          { id: 'c2t1', name: 'Environmental Chemistry (পরিবেশ রসায়ন)' },
+          { id: 'c2t2', name: 'Organic Chemistry (জৈব রসায়ন)' },
+          { id: 'c2t3', name: 'Quantitive Chemistry (পরিমাণগত রসায়ন)' },
+          { id: 'c2t4', name: 'Electro Chemistry (তড়িৎ রসায়ন)' },
+          { id: 'c2t5', name: 'Economical Chemistry (অর্থনৈতিক রসায়ন)' }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'biology-1',
+    title: 'Biology 1st Paper',
+    icon: 'Dna',
+    group: 'Science',
+    categories: [
+      {
+        name: 'Syllabus',
+        topics: [
+          { id: 'bio1t1', name: 'Cell and Its Structure (কোষ ও এর গঠন)' },
+          { id: 'bio1t2', name: 'Cell Division (কোষ বিভাজন)' },
+          { id: 'bio1t3', name: 'Cell Chemistry (কোষ রসায়ন)' },
+          { id: 'bio1t4', name: 'Micro-organism/Microbe (অনুজীব)' },
+          { id: 'bio1t5', name: 'Algae and Fungi (শৈবাল ও ছত্রাক)' },
+          { id: 'bio1t6', name: 'Bryophyta and Pteridophya (ব্রায়োফাইট ও টেরিডোফাইটা)' },
+          { id: 'bio1t7', name: 'Gymnosperms and Angiosperms (নগ্নবীজী ও আবৃতবীজী উদ্ভিদ)' },
+          { id: 'bio1t8', name: 'Tissue and Tissue System (টিস্যু ও টিস্যুতন্ত্র)' },
+          { id: 'bio1t9', name: 'Plant Physiology (উদ্ভিদ শারীরতত্ত্ব)' },
+          { id: 'bio1t10', name: 'Plant Peproduction (উদ্ভিদ প্রজনন)' },
+          { id: 'bio1t11', name: 'Biotechnology (জীবপ্রযুক্তি)' },
+          { id: 'bio1t12', name: 'Environment, Distribution and Conservation of Living Organisms (জীবের পরিবেশ, বিস্তার ও সংরক্ষণ)' }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'biology-2',
+    title: 'Biology 2nd Paper',
+    icon: 'Dna',
+    group: 'Science',
+    categories: [
+      {
+        name: 'Syllabus',
+        topics: [
+          { id: 'bio2t1', name: 'Animal Diversity & Classification (প্রাণীর বিভিন্নতা ও শ্রেণিবিন্যাস)' },
+          { id: 'bio2t2', name: 'Introduction to Animal (প্রাণীর পরিচিতি)' },
+          { id: 'bio2t3', name: 'Human Physiology : Digestion & Absorption (মানব শরীরতত্ত্ব : পরিপাক ও শোষণ)' },
+          { id: 'bio2t4', name: 'Human Physiology : Blood & Circulation (মানব শরীরতত্ত্ব : রক্ত ও সংবহনতন্ত্র)' },
+          { id: 'bio2t5', name: 'Human Physiology : Respiration & its Process (মানব শরীরতত্ত্ব : শ্বসন ও শ্বাসক্রিয়া)' },
+          { id: 'bio2t6', name: 'Human Physiology : Waste & Excretion (মানব শরীরতত্ত্ব : বর্জ্য ও নিষ্কাশন)' },
+          { id: 'bio2t7', name: 'Human Physiology : Locomotion & Organ Movement (মানব শরীরতত্ত্ব : চলন ও অঙ্গচালনা)' },
+          { id: 'bio2t8', name: 'Human Physiology : Co-ordination & Control (মানব শরীরতত্ত্ব : সমন্বয় ও নিয়ন্ত্রন)' },
+          { id: 'bio2t9', name: 'Continuity of Human Life (মানব জীবনের ধারাবাহিকতা)' },
+          { id: 'bio2t10', name: 'Immunity of Human Body (মানবদেহের প্রতিরক্ষা)' },
+          { id: 'bio2t11', name: 'Genetics & Evolution (জীনতত্ত্ব ও বিবর্তন)' },
+          { id: 'bio2t12', name: 'Animal Behaviour (প্রাণীর আচরণ)' }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'math-1',
+    title: 'Higher Math 1st Paper',
+    icon: 'Calculator',
+    group: 'Science',
+    categories: [
+      {
+        name: 'Syllabus',
+        topics: [
+          { id: 'm1t1', name: 'Matrix & Diterminations (ম্যাট্রিক্স ও নির্ণায়ক)' },
+          { id: 'm1t2', name: 'Vectors (ভেক্টর)' },
+          { id: 'm1t3', name: 'Straight Line (সরলরেখা)' },
+          { id: 'm1t4', name: 'Circles (বৃত্ত)' },
+          { id: 'm1t5', name: 'Permutations & Combinations (বিন্যাস ও সমাবেশ)' },
+          { id: 'm1t6', name: 'Trigonometric Ratios (ত্রিকোণমিতিক অনুপাত)' },
+          { id: 'm1t7', name: 'Trigonometric Ratios of Associated Angles (সংযুক্ত কোণের ত্রিকোণমিতিক অনুপাত)' },
+          { id: 'm1t8', name: 'Functions & Graph of Functions (ফাংশন ও ফাংশনের লেখচিত্র)' },
+          { id: 'm1t9', name: 'Differentiation (অন্তরীকরণ)' },
+          { id: 'm1t10', name: 'Integration (যোগজীকরণ)' }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'math-2',
+    title: 'Higher Math 2nd Paper',
+    icon: 'Calculator',
+    group: 'Science',
+    categories: [
+      {
+        name: 'Syllabus',
+        topics: [
+          { id: 'm2t1', name: 'Real Number & Inequalities (বাস্তব সংখ্যা ও অসমতা)' },
+          { id: 'm2t2', name: 'Linear Programming (যোগাশ্রয়ী প্রোগ্রাম)' },
+          { id: 'm2t3', name: 'Complex Number (জঠিল সংখ্যা)' },
+          { id: 'm2t4', name: 'Polynoials & Polynomial Equations (বহুপদী ও বহুপদী সমীকরণ)' },
+          { id: 'm2t5', name: 'Binomial Expansions (দ্বিপদী বিস্তৃতি)' },
+          { id: 'm2t6', name: 'Conics (কনিক)' },
+          { id: 'm2t7', name: 'Inverse Trigonometric Functions & Trigonometric Equations (বিপরীত ত্রিকোণমিতিক ফাংশন ও ত্রিকোণমিতিক সমীকরণ)' },
+          { id: 'm2t8', name: 'Statics (স্থিতিবিদ্যা)' },
+          { id: 'm2t9', name: 'Motion of Particles in a Plane (সমতলে বস্তুকণার গতি)' },
+          { id: 'm2t10', name: 'Measures of Dispersions & Probability (বিস্তার পরিমাপ ও সম্ভাবনা)' }
         ]
       }
     ]
